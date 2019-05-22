@@ -8,7 +8,7 @@
  * @brief    
  * @version  0.0.1
  * 
- * Last Modified:  2019-05-20
+ * Last Modified:  2019-05-21
  * Modified By:    詹长建 (2233930937@qq.com)
  * 
  */
@@ -20,6 +20,7 @@
 #include <iostream>
 #include <iomanip> //std::setw()
 #include <fstream>
+#include <vector>
 
 int CreateNodes(){
     double x,y;
@@ -51,7 +52,7 @@ int CreateNodes(){
     out<<std::endl<<std::endl<<"节点传输负载大小"<<std::endl;
     out<<Payload<<std::endl;
     
-    out<<std::endl<<std::endl<<"节点的位置坐标"<<std::endl
+    out<<std::endl<<std::endl<<"在半径为"<<propagate_range<<"m的范围内，节点的位置坐标"<<std::endl
     <<std::setw(19)<<"节点ID"
     <<std::setw(23)<<"节点X轴坐标"
     <<std::setw(24)<<"节点Y轴坐标"<<std::endl;
@@ -77,19 +78,19 @@ int CreateNodes(){
     }
     
     out<<std::endl<<std::endl<<"节点之间的距离"<<std::endl<<std::setw(4)<<" ";
-    for(uint32_t i=0;i<node_number;i++){
-        out<<std::setw(12)<<i;
+    for(uint32_t j=0; j<node_number; j++){
+        out<<std::setw(12)<<j;
     }
     out<<std::endl;
     for(uint32_t i=0;i<node_number;i++){ 
         out<<std::setw(4)<<i;
         for(uint32_t j=0;j<node_number;j++){
-            neighbor_node[i][j].neighbor_address=i;
+            neighbor_node[i][j].local_address=i;
+            neighbor_node[i][j].neighbor_address=j;
+            neighbor_node[i][j].transmission_state=No;
             neighbor_node[i][j].neighbor_distance=sqrt(
                 (nodes[i].x_axis-nodes[j].x_axis)*(nodes[i].x_axis-nodes[j].x_axis)
                +(nodes[i].y_axis-nodes[j].y_axis)*(nodes[i].y_axis-nodes[j].y_axis));
-            neighbor_node[i][j].neighbor_position.x_axis=nodes[j].x_axis;
-            neighbor_node[i][j].neighbor_position.y_axis=nodes[j].y_axis;
             out<<std::setw(12)<<neighbor_node[i][j].neighbor_distance;
         }
         out<<std::endl;
@@ -102,15 +103,36 @@ int CreateNodes(){
 
 double SimulatorRun(uint32_t simulation_time){
     Node node[node_number];
-    for(uint32_t i=0;i<node_number;i++){
-        node[i].address_=nodes[i].address;         //节点地址
-        node[i].position_.address=nodes[i].address;//节点坐标
-        node[i].position_.x_axis=nodes[i].x_axis; 
-        node[i].position_.y_axis=nodes[i].y_axis;
+    std::cout<<"节点的坐标"<<std::endl;
+    for(uint32_t i=0; i<node_number; i++){
+        node[i].address_=nodes[i].address; //节点地址
         std::cout<<nodes[i].address<<"\t"<<nodes[i].x_axis<<"\t"<<nodes[i].y_axis<<std::endl;
     }
+    
+    std::vector<int> send_index;   //哪些节点在发送数据
+	std::vector<int>::iterator iterVector;
+    // todo
+    // 运行仿真
+    for(double bus_clock=0; bus_clock < simulation_time ; bus_clock += time_unit){
+        for(uint32_t j=0;j<node_number;j++){
+            for(uint32_t i=0;i<node_number;i++){
+                uint32_t num = neighbor_node[i][j].packetVector.size();
+                if(num){
+                    for(uint32_t index=0; index < num ;index++){
+                        if(bus_clock >= neighbor_node[i][j].packetVector.at(index).rx_start){
+                            node[j].work_state_=ReceiveState;
+                        }
+                    }  
+                }
+            }
+        }
+            
+        // for(uint32_t index=0;index<node_number;index++){
+        //     if(node[index].work_state_==SendState)
+        //     {
 
-    //todo
-    //运行仿真
+        //     }
+        // }
+    }
     return EXIT_SUCCESS;
 }

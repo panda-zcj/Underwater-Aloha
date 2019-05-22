@@ -8,7 +8,7 @@
  * @brief    
  * @version  0.0.1
  * 
- * Last Modified:  2019-05-20
+ * Last Modified:  2019-05-21
  * Modified By:    詹长建 (2233930937@qq.com)
  * 
  */
@@ -39,12 +39,19 @@ struct FrameFormat
     }
 };
 #else
-const uint32_t  Physical=16*8;    ///< 物理层头
-const uint32_t  Mac=24*8;         ///< MAC头
-const uint32_t  Payload=1500*8;   ///< 数据负载
-const uint32_t  Rts=20*8;         ///< RTS帧
-const uint32_t  Cts=14*8;         ///< CTS帧
-const uint32_t  Ack=14*8;         ///< 应答帧
+// const uint32_t  Physical=16*8;    ///< 物理层头
+// const uint32_t  Mac=24*8;         ///< MAC头
+// const uint32_t  Payload=1500*8;   ///< 数据负载
+// const uint32_t  Rts=20*8;         ///< RTS帧
+// const uint32_t  Cts=14*8;         ///< CTS帧
+// const uint32_t  Ack=14*8;         ///< 应答帧
+
+extern uint32_t   Physical;///< 物理层头
+extern uint32_t   Mac;     ///< MAC头
+extern uint32_t   Payload; ///< 数据负载
+extern uint32_t   Rts;     ///< RTS帧
+extern uint32_t   Cts;     ///< CTS帧
+extern uint32_t   Ack;     ///< 应答帧
 #endif
 
 extern double     slot;   ///< 最小时隙单元
@@ -52,5 +59,6 @@ extern double     sifs;   ///< 接收状态和发送状态的切换时间
 extern double     difs;   ///< 判断空闲的等待时间
 extern uint32_t   cw_min; ///< 最小退避窗口
 extern uint32_t   cw_max; ///< 最大退避窗口
+extern uint32_t   reTx_max;///< 最大重发次数
 
 #endif //MAC_H

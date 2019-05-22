@@ -8,7 +8,7 @@
  * @brief    
  * @version  0.0.1
  * 
- * Last Modified:  2019-05-20
+ * Last Modified:  2019-05-21
  * Modified By:    詹长建 (2233930937@qq.com)
  * 
  */
@@ -64,21 +64,41 @@ void usage(FILE * fp, int argc, char ** argv)
 
 int main(int argc , char* argv[])
 { 
-    transmission_rate = 5000;    // 传输速率 5kb/s
-    propagate_speed   = 1500;    // 传播速度 1500m/s
-    propagate_range   = 500;     // 传播范围 500m
-    propagate_power   = 10;      // 传播功率 10w
-    propagate_error   = 0.001;   // 传播误码率
+    // todo
+    // 命令行添加
+    // 接收功率
+    // mac协议的各帧大小
+    // 最大重发次数
+    transmission_rate = 5000;    // 传输速率  5kb/s
+    propagate_speed   = 1500;    // 传播速度  1500m/s
+    propagate_range   = 500;     // 传播范围  500m
+    propagate_power   = 10;      // 传播功率  10w
+    receive_power     = 0.08;    // 接收功率  80mw
+    propagate_error   = 0;       // 传播误码率
     propagate_speed_jitter=propagate_range/propagate_speed/29; //传速度变化
-    slot =0.2;   // 最小时隙单元
-    sifs =0.1;   // 接收状态和发送状态的切换时间
-    difs =0.2;   // 判断空闲的等待时间
-    cw_min=32;   // 最小退避窗口
-    cw_max=1024; // 最大退避窗口 
 
-    node_number =10; 
-    simulation_time=600; 
-    time_unit=0.01; 
+    Physical=16*8;  // 物理层头
+    Mac=24*8;       // MAC头
+    Payload=1024*8; // 数据负载
+    Rts=20*8;       // RTS帧
+    Cts=14*8;       // CTS帧
+    Ack=14*8;       // 应答帧
+    slot =0.2;      // 最小时隙单元
+    sifs =0.1;      // 接收状态和发送状态的切换时间
+    difs =0.2;      // 判断空闲的等待时间
+    cw_min=31;      // 最小退避窗口
+    cw_max=1023;    // 最大退避窗口 
+    reTx_max=2;     // 最大重发次数
+    
+    node_number =10; // 仿真的节点个数
+    simulation_time=600; // 仿真时间
+    time_unit=0.001; // 仿真运行基本时间单元  1ms
+
+    average_energy_consumption=0; // 能耗
+    total_packets=0;    // 总的发包个数
+    average_delay=0;    // 平均时延
+    throughput=0;       // 吞吐量
+    packet_loss_rate=0; // 丢包率
     
     for (;;) {
 		int index;
@@ -183,9 +203,14 @@ int main(int argc , char* argv[])
 			break;
 		}
 	}
-    CreateNodes();
-    SimulatorRun(simulation_time);
 
+    
+    CreateNodes();
+    for(uint32_t i=0;i<1;i++)
+    {
+        SimulatorRun(simulation_time);
+    }
+    
     //todo
     //仿真结束 添加吞吐量、丢包率、能耗(发包*发包个数)、仿真时间到文件"%d个节点配置.txt"
 
@@ -197,9 +222,9 @@ int main(int argc , char* argv[])
         out<<"仿真结果"<<std::endl<<std::endl;
         out<<std::setw(18)<<"仿真时间"<<std::setw(18)<<"吞吐量"<<std::setw(18)<<"丢包率"<<std::setw(18)<<"能耗"<<std::endl;
         out<<std::setw(13)<<simulation_time
-        <<std::setw(15)<<throughput
-        <<std::setw(14)<<packet_loss_rate
-        <<std::setw(14)<<average_energy_consumption;
+        <<std::setw(15)<<std::setprecision(2)/* 保留两位小数*/<<throughput
+        <<std::setw(14)<<std::setprecision(2)<<packet_loss_rate
+        <<std::setw(14)<<std::setprecision(2)<<average_energy_consumption;
         out.close();
     }
 	return EXIT_SUCCESS;

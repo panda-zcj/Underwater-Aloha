@@ -12,8 +12,8 @@
  * Modified By:    詹长建 (2233930937@qq.com)
  * 
  */
-#ifndef SCHEDULE_H
-#define SCHEDULE_H
+#ifndef RUN_H
+#define RUN_H
 
 #include "node.h"
 #include "common.h"
@@ -42,4 +42,4 @@ double SimulatorRun(uint32_t simulation_time);
 }
 #endif
 
-#endif //SCHEDULE_H
+#endif //RUN_H
