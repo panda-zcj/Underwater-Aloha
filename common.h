@@ -8,7 +8,7 @@
  * @brief    
  * @version  0.0.1
  * 
- * Last Modified:  2019-05-22
+ * Last Modified:  2019-05-27
  * Modified By:    詹长建 (2233930937@qq.com)
  * 
  */
@@ -16,18 +16,9 @@
 #define COMMON_H
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <vector>
-#include <algorithm>
+#include <string>
 
-/**
- * @brief 是否向邻居传输数据
- * 
- */
-enum TransitToNeighbor{ 
-    No,  ///< 不传输数据
-    Yes  ///< 传输数据
-};
 
 /**
  * @brief 数据包类型
@@ -40,16 +31,16 @@ enum PacketType{
     ACK
 };
 /**
- * @brief 表示发送一个数据包所处的状态
+ * @brief 表示收发一个数据包的结果
  * 
  */
 enum PacketState{
-    Default,    ///< 生成一个数据包，等待接收端处理
-    Success,    ///< 成功发送一个数据包
-    Fail        ///< 失败发送一个数据包
+    Default,    ///< 收发一个数据包的初始结果
+    Success,    ///< 成功收发一个数据包
+    Fail        ///< 失败收发一个数据包
 };
 /**
- * @brief 记录一个数据包消耗的资源
+ * @brief 记录一个数据包的统计数据
  * 
  */
 struct Packet
@@ -72,8 +63,8 @@ struct Packet
     to(0),type(DATA),state(Default),retransfer_number(0),
     transmission(0),tx_start(0),tx_end(0),rx_start(0),rx_end(0),delay(0)
     ,energy(0){
-        /*code*/
-    };
+        
+    }
 };
 /**
  * @brief 水声节点位置
@@ -99,25 +90,20 @@ struct NodeLocation
  */
 struct NeighborsNode
 {
-    // struct NodeLocation neighbor_position; ///<邻居节点位置
     uint32_t local_address;                ///<本节点地址 
     uint32_t neighbor_address;             ///<邻居节点地址
     double   neighbor_distance;            ///<与邻居节点的距离
-    uint32_t transmission_state;           ///<是否向邻居节点开始传输
-    // double   receive_start;                ///<邻居节点接收开始时间
-    // double   receive_end;                  ///<邻居节点接收结束时间 
-    std::vector<struct Packet> packetVector;///< 发包的集合
-
-    NeighborsNode():
-    // receive_start(0),receive_end(0),
-    transmission_state(No){
+    
+    NeighborsNode(){
         /*code*/
     } 
 };
 
 
-extern struct NodeLocation  nodes[50];  ///<所有节点的位置
-extern struct NeighborsNode neighbor_node[50][50]; ///<邻居节点
+extern std::vector<struct NodeLocation>                 nodes;          ///< 每个节点的位置
+extern std::vector<std::vector<struct NeighborsNode>>   neighbor_node;  ///< 邻居节点之间的距离
+extern std::vector<std::vector<struct Packet>>          rxpacketVector; ///< 每个节点接收的数据包
+extern std::vector<std::vector<struct Packet>>          txpacketVector; ///< 每个节点发送的数据包
 
 extern uint32_t   node_number;      ///< 仿真的节点个数
 extern double     simulation_time;  ///< 仿真时间
@@ -125,14 +111,18 @@ extern double     time_unit;        ///< 仿真运行基本时间单元
 
 
 extern uint32_t   total_packets;    ///< 总的发包个数
+extern uint32_t   packets;          ///< 成功的个数
+extern uint32_t   drop_packets;     ///< 丢包的个数
 extern double     throughput;       ///< 吞吐量
 extern double     packet_loss_rate; ///< 丢包率
+extern double     energy_consumption;///< 总能耗
 extern double     average_energy_consumption; ///< 能耗
 extern double     average_delay;    ///< 平均时延
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 /**
  * @brief 生成随机数
  * 
@@ -141,17 +131,31 @@ uint32_t ulrand(void);
 /**
  * @brief sort()函数的对比函数，这里为升序排序
  * sort()函数的对比函数，这里为升序排序。\a 和 \b 为两个比较大小的值
- * @return true \a 小于 \b
- * @return false \a 大于 \b
+ * @return true  \a 小于  \b
+ * @return false \a 大于  \b
  */
 bool AscendingOrder(const struct Packet &a , const struct Packet &b);
 /**
  * @brief     统计所有节点生成的数据包
  * 
  * @param pac 节点生成的数据包
- * @return uint32_t 
+ * @return uint32_t 成功返回 0
  */
 uint32_t PushPacket(const struct Packet &pac);
+/**
+ * @brief 得到数据包的状态(比如是否发送成功)
+ * 
+ * @param pac 
+ * @return std::string 返回状态描述
+ */
+std::string GetPacketState(const struct Packet &pac);
+/**
+ * @brief 得到发送数据包的类型
+ * 
+ * @param pac 
+ * @return std::string  返回
+ */
+std::string GetPacketType(const struct  Packet &pac);
 
 #ifdef __cplusplus
 }

@@ -8,7 +8,7 @@
  * @brief    
  * @version  0.0.1
  * 
- * Last Modified:  2019-05-22
+ * Last Modified:  2019-05-27
  * Modified By:    詹长建 (2233930937@qq.com)
  * 
  */
@@ -40,24 +40,16 @@ enum Timer{
     On   ///< 开启定时器
 };
 /**
- * @brief 信道状态
- * 
- */
-enum ChannelState{
-    Idle, ///< 信道空闲
-    Busy  ///< 信道忙碌
-};
-/**
  * @brief 节点所处状态
  * 
  */
 enum NodeState{
-    IdleState,    ///< 空闲状态
-    BackOffState, ///< 退避状态
-    SendState,    ///< 发送状态
-    ReceiveState, ///< 接收状态
-    CollsionState, ///< 冲突状态
-    AckTimeoutState ///< 应答超时状态
+    IdleState,      ///< 空闲状态
+    BackOffState,   ///< 退避状态
+    SendState,      ///< 发送状态 
+    ReceiveState,   ///< 接收状态
+    CollsionState,  ///< 冲突状态
+    WaitAck         ///<  等待应答状态
 };
 
 
@@ -73,8 +65,8 @@ public:
 
     uint32_t   address_;       ///< 节点地址
     
-    uint32_t   current_time_;  ///< 节点运行时钟
-	uint32_t   alarm_time_;    ///< 定时器时钟
+    double     current_time_;  ///< 节点运行时钟
+	double     alarm_time_;    ///< 定时器时钟
     
     uint32_t   cw_;         ///< 当前退避窗口
     uint32_t   cw_counter_; ///< 当前退避计数器
@@ -82,19 +74,28 @@ public:
     uint32_t   packet_counter_;   ///< 成功发送包的个数
     uint32_t   drop_counter_;     ///< 抛弃的包个数
     uint32_t   send_counter_;     ///< 发送的包个数
-    struct Packet packet;         ///< 统计数据包操作记录
 
-    // double     transmission_duration_;  ///< 传输数据持续的时间
-    // double     transmission_start_;     ///< 传输开始时间
-    // double     transmission_end_;       ///< 传输结束时间
+    uint32_t   num;               ///< 当前正发送第n个包
+    uint32_t   sequence_;         ///< 当前时间正接收第n个包
+    double     send_energy_;      ///< 发送的能量
+    double     receive_energy_;   ///< 接收的能量
+    struct Packet tx_packet;      ///< 发送的数据包
+    // struct Packet rx_packet;      ///< 接收的数据包
 
-    // uint32_t   send_energy_;      ///< 发送的能量
-    // uint32_t   receive_energy_;   ///< 接收的能量
 
-    uint32_t   work_state_;   ///< 节点所处状态
-    uint32_t   channel_state_;///< 信道状态
-    uint32_t   timer_state_;  ///< 定时器所处状态
-    uint32_t   timer_;        ///< 定时器开关状态
+    // double     rx_start_;         ///< 接收开始时间
+    // double     rx_end_;           ///< 接收结束时间
+    // double     interfere_start_;  ///< 干扰开始时间
+    // double     interfere_end_;    ///< 干扰结束时间
+   
+    uint32_t   work_state_;      ///< 节点当前所处状态
+    uint32_t   next_work_state_; ///< 节点下一个工作状态
+    // uint32_t   channel_state_;   ///< 信道状态
+    // uint32_t   timer_state_;     ///< 定时器所处状态
+    uint32_t   timer_;           ///< 定时器开关状态
+    double     time_out_;        ///< ACK超时时间
+    
+    
 public:
     /**
      * @brief Construct a new Node object
@@ -106,12 +107,45 @@ public:
     virtual ~Node();
 
     
-    //todo
-    // 完成下列函数
-	void Run(uint32_t clock);
-	void Timer(uint32_t flag_channel);
-	void SetAlarm(uint32_t alarm_time);
-    uint32_t Channel(const uint32_t address,const double current_time);
+    /**
+     * @brief 初始化发送的数据包
+     * 
+     */
+    void InitData();
+    /**
+     * @brief  发送数据包
+     * 
+     */
+    void SendData();
+    /**
+     * @brief  ack应答
+     * 
+     */
+    void SendAck();
+    /**
+     * @brief 仿真过程当前时刻的状态计算
+     * 
+     * @param clock 当前时刻
+     */
+	void Run(double clock);
+    /**
+     * @brief 定时器超时处理函数
+     * 
+     */
+	void Timer();
+    /**
+     * @brief  开启定时器
+     * 
+     * @param time  定时器的超时时刻
+     * @param state 超时后的节点工作状态
+     */
+	void SetAlarm(double time,uint32_t state);
+    /**
+     * @brief 开启定时器
+     * 
+     * @param time 定时器的超时时刻
+     */
+    void SetAlarm(double time);
 };
 
 #endif //NODE_H

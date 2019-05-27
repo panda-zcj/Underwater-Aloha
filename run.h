@@ -8,7 +8,7 @@
  * @brief    
  * @version  0.0.1
  * 
- * Last Modified:  2019-05-20
+ * Last Modified:  2019-05-23
  * Modified By:    詹长建 (2233930937@qq.com)
  * 
  */
@@ -16,9 +16,6 @@
 #define RUN_H
 
 #include "node.h"
-#include "common.h"
-#include "channel.h"
-#include "mac.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,7 +33,7 @@ int CreateNodes();
  * 
  * @return double 返回归一化吞吐量
  */
-double SimulatorRun(uint32_t simulation_time);
+double SimulatorRun(double simulation_time);
 
 #ifdef __cplusplus
 }
